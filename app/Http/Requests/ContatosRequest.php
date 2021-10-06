@@ -24,7 +24,9 @@ class ContatosRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+
+
         ];
     }
+    
 }

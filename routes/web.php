@@ -16,3 +16,5 @@ use App\Http\Controllers\ContatosController;
 Route::redirect('/', '/contatos');
 
 Route::resource('/contatos' , ContatosController::class);
+Route::get('delete/{id}', [ContatosController::class, 'destroy'])->name('delete');
+Route::get('gerar-pdf', [ContatosController::class, 'gerarPDF'])->name('gerar-pdf');

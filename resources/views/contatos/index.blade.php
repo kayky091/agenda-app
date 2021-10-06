@@ -6,12 +6,24 @@
         <div class="container-fluid">
             <a class="navbar-brand">Contatos</a>
             <div class="d-flex">
+                <a class="btn btn-info me-3" href="{{ route('gerar-pdf') }}">Gerar PDF</a>
                 <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                     Cadastrar
                 </button>
-                <form class="d-flex">
+                @if (isset($search))
+                    <form class="d-flex" method="GET" action="{{ route('contatos.index') }}">
 
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                        <input style="display: none" class="form-control me-2" type="search" placeholder="Search"
+                            aria-label="Search" id="search" name="search" value="">
+                        <button class="btn btn-outline-success me-2" type="submit">Limpar busca</button>
+                    </form>
+
+                @endif
+
+                <form class="d-flex" method="GET" action="{{ route('contatos.index') }}">
+
+                    <input class="form-control me-2" type="search" placeholder="Pesquisar.." aria-label="Search" id="search"
+                        name="search">
                     <button class="btn btn-outline-success" type="submit">Procurar</button>
                 </form>
             </div>
@@ -26,13 +38,24 @@
         </div>
     @endif
     @if (session('edits'))
-        <div class="alert  alert-success alert-dismissible fade show" role="alert">
+        <div class="alert  alert-primary alert-dismissible fade show" role="alert">
             <strong>{{ session('edits') }}</strong>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    @if (session('delete'))
+        <div class="alert  alert-danger alert-dismissible fade show" role="alert">
+            <strong>{{ session('delete') }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-
+    @if (count($contato) == 0)
+        <div class="alert  alert-danger alert-dismissible fade show" role="alert">
+            <strong>Nao existe " {{ $search }} " nos registros</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
 
     <!-- Tabela de registros -->
@@ -58,133 +81,21 @@
                     <td>{{ $contatos->telefone }}</td>
                     <td>{{ $contatos->email }}</td>
                     <td>
-                        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editar">
-                            editar
-                        </button>
-                        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#show">
-                            show
-                        </button>
+                        <a class="btn btn-primary" href="{{ route('contatos.edit', $contatos->id) }}">editar</a>
+                        <a class="btn btn-info" href="{{ route('contatos.show', $contatos->id) }}">visualizar</a>
+                        <a class="btn btn-danger" onclick=" return confirm('Tem certeza que deseja deletar este registro?')"
+                            href="{{ url('delete', ['id' => $contatos->id]) }}">Remover</a>
+
                     </td>
                 </tr>
 
-                <!--Modal resposnsavel pela edicao -->
 
-                <div class="modal fade" id="editar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="staticBackdropLabel">Editar</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" action=" {{ route('contatos.update', $contatos->id) }}"
-                                    class="row g-3 needs-validation" enctype="multipart/form-data">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="input-group mb-3 ">
-                                        <div class="col-md-4  me-5">
-                                            <label for="nome" class="form-label">Nome:</label>
-                                            <input type="text" class="form-control" id="nome" name="nome"
-                                                value="{{ $contatos->nome }}">
-                                        </div>
-
-                                        <div class="col-md-4  >
-                                            <label for="
-                                            sobrenome" class="form-label">Sobrenome:</label>
-                                            <input type="text" class="form-control" id="sobrenome" name="sobrenome"
-                                                value="{{ $contatos->sobrenome }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="input-group mb-3">
-
-                                        <div class="col-md-4 me-5">
-                                            <label for="email" class="form-label">Email:</label>
-                                            <input type="text" class="form-control" id="email" name="email"
-                                                value="{{ $contatos->email }}">
-                                        </div>
-
-                                        <div class="col-md-4 ">
-                                            <label for="telefone" class="form-label">Telefone:</label>
-                                            <input type="text" class="form-control" id="telefone" name="telefone"
-                                                value="{{ $contatos->telefone }}">
-                                        </div>
-
-                                    </div>
-
-                                    <div class="form-group mb-4">
-                                        <label for="image">Foto</label>
-                                        <input type="file" class="form-control-file" id="image" name="image">
-                                    </div>
-
-                                    <div class="col-12">
-                                        <button class="btn btn-primary" type="submit">Salvar</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal responsavel por mostrar os registro detalhados-->
-
-                <div class="modal fade" id="show" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="staticBackdropLabel">Show</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" action="" class="row g-3 needs-validation"
-                                    enctype="multipart/form-data">
-                                    @csrf
-
-                                    <div class="col-md-4">
-                                        <label for="nome" class="form-label">Nome:</label>
-                                        <input type="text" class="form-control" id="nome" name="nome">
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label for="sobrenome" class="form-label">Sobrenome:</label>
-                                        <input type="text" class="form-control" id="sobrenome" name="sobrenome">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="email" class="form-label">Email:</label>
-                                        <input type="text" class="form-control" id="email" name="email">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="telefone" class="form-label">Telefone:</label>
-                                        <input type="text" class="form-control" id="telefone" name="telefone">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="image">Foto</label>
-                                        <input type="file" class="form-control-file" id="image" name="image">
-                                    </div>
-
-                                    <div class="col-12">
-                                        <button class="btn btn-primary" type="submit">Salvar</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
             @endforeach
 
 
         </tbody>
     </table>
-
+   
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -200,27 +111,29 @@
 
                         <div class="col-md-4">
                             <label for="nome" class="form-label">Nome:</label>
-                            <input type="text" class="form-control" id="nome" name="nome">
+                            <input type="text" class="form-control" id="nome" name="nome" required>
+
                         </div>
 
                         <div class="col-md-4">
                             <label for="sobrenome" class="form-label">Sobrenome:</label>
-                            <input type="text" class="form-control" id="sobrenome" name="sobrenome">
+                            <input type="text" class="form-control" id="sobrenome" name="sobrenome" required>
                         </div>
 
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email:</label>
-                            <input type="text" class="form-control" id="email" name="email">
+                            <input type="text" class="form-control" id="email" name="email" required>
+
                         </div>
 
                         <div class="col-md-6">
                             <label for="telefone" class="form-label">Telefone:</label>
-                            <input type="text" class="form-control" id="telefone" name="telefone">
+                            <input type="text" class="form-control" id="telefone" name="telefone" required>
                         </div>
 
                         <div class="form-group">
                             <label for="image">Foto</label>
-                            <input type="file" class="form-control-file" id="image" name="image">
+                            <input type="file" class="form-control-file" id="image" name="image" required>
                         </div>
 
                         <div class="col-12">
